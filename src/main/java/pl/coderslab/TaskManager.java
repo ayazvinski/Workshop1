@@ -2,29 +2,58 @@ package pl.coderslab;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class TaskManager {
     static String[][] tasks;
+    static String fileName = "tasks.csv";
+    static String[] options = new String[] {"add","remove", "list","exit"};
 
     public static void main(String[] args) {
 
-        selectOption(args);
         tasks = readFile("tasks.csv");
-        addTask(tasks);
+        selectOption(options);
+
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+
+            switch (line) {
+                case "exit":
+                saveFile(fileName, tasks);
+                    System.out.println(ConsoleColors.RED + "Bye, bye.");
+                    System.exit(0);
+                    break;
+                case "add":
+                    addTask();
+                    break;
+               case "remove":
+                    deleteTask(tasks,taskNumber());
+                    System.out.println("Value was successfully deleted.");
+                    break;
+                case "list":
+                    listArray(tasks);
+                    break;
+                default:
+                    System.out.println("Please select a correct option.");
+            }
+
+            selectOption(options);
+        }
 
     }
 
     public static void selectOption(String[] args) {
-        String[] options = new String[] {"add","remove", "list","exit"};
 
         System.out.println(ConsoleColors.BLUE + "Please select an option");
 
-        for (int i = 0; i < options.length; i++) {
-            System.out.println(ConsoleColors.RESET + options[i]);
+        for (int i = 0; i < args.length; i++) {
+            System.out.println(ConsoleColors.RESET + args[i]);
         }
     }
 
@@ -74,16 +103,11 @@ public class TaskManager {
         }catch (IOException io){
             io.printStackTrace();
     }
-        for (int i = 0; i < resultArray.length; i++) {
-            for (int j = 0; j < resultArray[i].length; j++) {
-                System.out.print(resultArray[i][j]);
-            }
-            System.out.println();
-        }
         return resultArray;
     }
 
-    public static String [][] addTask (String [][] actualTasks) {
+
+    public static void addTask() {
         String descrioption = "";
         String dueDate = "";
         String importance;
@@ -98,33 +122,105 @@ public class TaskManager {
 
         int column = 0;
 
-        for (int i = 0; i < actualTasks.length; i++) {
-            if (actualTasks[i].length > column){
-                column = actualTasks[i].length;
+        for (int i = 0; i < tasks.length; i++) {
+            if (tasks[i].length > column) {
+                column = tasks[i].length;
             }
         }
 
-        String [][] arrayCopy = new String [actualTasks.length+1][column];
+        String[][] arrayCopy = new String[tasks.length + 1][column];
 
-        for (int i = 0; i < actualTasks.length; i++) {
-            for (int j = 0; j < actualTasks[i].length; j++) {
-                arrayCopy[i][j] = actualTasks[i][j];
 
+        for (int i = 0; i < tasks.length; i++) {
+            for (int j = 0; j < tasks[i].length; j++) {
+                arrayCopy[i][j] = tasks[i][j];
             }
-            arrayCopy[arrayCopy.length-1][0] = descrioption + " ";
-            arrayCopy[arrayCopy.length-1][1] = dueDate + " ";
-            arrayCopy[arrayCopy.length-1][2] = importance;
+        }
+            arrayCopy[arrayCopy.length - 1][0] = descrioption + " ";
+            arrayCopy[arrayCopy.length - 1][1] = dueDate + " ";
+            arrayCopy[arrayCopy.length - 1][2] = importance;
+
+            tasks = arrayCopy;
 
         }
-        for (int i = 0; i < arrayCopy.length; i++) {
-            for (int j = 0; j < arrayCopy[i].length; j++) {
-                System.out.print(arrayCopy[i][j]);
+
+        public static int taskNumber (){
+
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Please select number to remove");
+            int taskNumber = scanner.nextInt();
+            return taskNumber;
+        }
+
+
+        public static void deleteTask(String [][] array, int taskNumber) {
+
+        int column = 0;
+
+            for (int i = 0; i < array.length; i++) {
+                if (array[i].length > column) {
+                    column = array[i].length;
+                }
+            }
+
+            String [][] newArray = new String[array.length-1][column];
+
+            int newIndex = 0;
+
+           for (int i = 0; i < array.length; i++) {
+               if (i != taskNumber-1) {
+                    for (int j = 0; j < array[i].length; j++) {
+                        newArray[newIndex][j] = array[i][j];
+                    }
+                        newIndex++;
+                }
+           }
+            tasks = newArray;
+
+            for (int i = 0; i < tasks.length; i++) {
+                for (int j = 0; j < tasks[i].length; j++) {
+                    System.out.print(tasks[i][j]);
+                }
+                System.out.println();
+            }
+
+        }
+
+    public static void listArray (String[][] args) {
+
+        for (int i = 0; i < args.length; i++) {
+            for (int j = 0; j < args[i].length; j++) {
+                System.out.print(args[i][j]);
             }
             System.out.println();
+        }
+
+    }
+
+    public static void saveFile (String fileName, String [][] toSave){
+
+       try{
+           FileWriter writer = new FileWriter(fileName);
+       // Path file = Paths.get(fileName);
+
+        String [] save = new String [tasks.length];
+        for (int i = 0; i < save.length; i++) {
+            save[i] = String.join(",",toSave[i]);
+        }
+
+        for (int i = 0; i < save.length; i++) {
+            writer.write(save[i] + "," +"\n");
 
         }
-        return arrayCopy;
+        writer.close();
+
+        }catch (IOException io){
+           io.printStackTrace();
+       }
+
     }
+
+
 
 
 
