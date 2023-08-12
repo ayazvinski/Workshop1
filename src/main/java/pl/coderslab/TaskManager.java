@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class TaskManager {
@@ -99,26 +100,48 @@ public class TaskManager {
 
 
         }catch (FileNotFoundException nf){
-            nf.printStackTrace();
+            System.out.println(nf + " Source File not found!");
+            System.exit(0);
         }catch (IOException io){
-            io.printStackTrace();
+            System.out.println(io + " Source File not found!");
+            System.exit(0);
     }
         return resultArray;
     }
 
 
     public static void addTask() {
-        String descrioption = "";
+        String description = "";
         String dueDate = "";
         String importance;
 
         Scanner scanner = new Scanner(System.in);
+
         System.out.println("Please add task description");
-        descrioption = scanner.nextLine();
+        description = scanner.nextLine();
+        while (description.equals("")) {
+            System.out.println("Value cant be empty!");
+            description = scanner.nextLine();
+        }
+
         System.out.println("Please add task due date");
         dueDate = scanner.nextLine();
+        while (dueDate.equals("")) {
+            System.out.println("Value cant be empty!");
+            dueDate = scanner.nextLine();
+        }
+
         System.out.println("Is your task important: true/false");
         importance = scanner.nextLine();
+        while (importance.equals("")) {
+            System.out.println("Value cant be empty!");
+            importance = scanner.nextLine();
+        }
+        while (!importance.equalsIgnoreCase("True") && !importance.equalsIgnoreCase("False")) {
+            System.out.println("Bad value provided! Put True or False.");
+            importance = scanner.nextLine();
+        }
+
 
         int column = 0;
 
@@ -136,7 +159,7 @@ public class TaskManager {
                 arrayCopy[i][j] = tasks[i][j];
             }
         }
-            arrayCopy[arrayCopy.length - 1][0] = descrioption + " ";
+            arrayCopy[arrayCopy.length - 1][0] = description + " ";
             arrayCopy[arrayCopy.length - 1][1] = dueDate + " ";
             arrayCopy[arrayCopy.length - 1][2] = importance;
 
@@ -144,14 +167,18 @@ public class TaskManager {
 
         }
 
-        public static int taskNumber (){
+        public static int taskNumber () {
 
             Scanner scanner = new Scanner(System.in);
-            System.out.println("Please select number to remove");
-            int taskNumber = scanner.nextInt();
-            return taskNumber;
-        }
 
+            System.out.println("Please select number to remove");
+            while (!scanner.hasNextInt()){
+                System.out.println("Provided value is not number! Provide number greater than 0");
+                scanner.next();
+            }
+            int number = scanner.nextInt();
+            return number;
+        }
 
         public static void deleteTask(String [][] array, int taskNumber) {
 
@@ -167,22 +194,30 @@ public class TaskManager {
 
             int newIndex = 0;
 
-           for (int i = 0; i < array.length; i++) {
-               if (i != taskNumber-1) {
-                    for (int j = 0; j < array[i].length; j++) {
-                        newArray[newIndex][j] = array[i][j];
-                    }
-                        newIndex++;
-                }
-           }
-            tasks = newArray;
 
-            for (int i = 0; i < tasks.length; i++) {
-                for (int j = 0; j < tasks[i].length; j++) {
-                    System.out.print(tasks[i][j]);
-                }
-                System.out.println();
+            try {
+                for (int i = 0; i < array.length; i++) {
+               if (i != taskNumber - 1) {
+                   for (int j = 0; j < array[i].length; j++) {
+                           newArray[newIndex][j] = array[i][j];
+                       }
+                     newIndex++;
+                   }
+
+               }
+                tasks = newArray;
+           }catch(ArrayIndexOutOfBoundsException ex) {
+                System.out.println("Element not exist in tab");
+                deleteTask(tasks,taskNumber());
             }
+
+
+        //    for (int i = 0; i < tasks.length; i++) {
+        //       for (int j = 0; j < tasks[i].length; j++) {
+        //           System.out.print(tasks[i][j]);
+        //        }
+        //        System.out.println();
+         //   }
 
         }
 
@@ -201,7 +236,6 @@ public class TaskManager {
 
        try{
            FileWriter writer = new FileWriter(fileName);
-       // Path file = Paths.get(fileName);
 
         String [] save = new String [tasks.length];
         for (int i = 0; i < save.length; i++) {
